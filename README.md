@@ -7,9 +7,15 @@ Mostly reused code from https://github.com/sherjilozair/char-rnn-tensorflow whic
 - [Tensorflow](http://www.tensorflow.org)
 
 # Basic Usage
-To train with default parameters on the tinyshakespeare corpus, run `python train.py`.
+To train with default parameters on the tinyshakespeare corpus, run:
+```bash
+python train.py
+```
 
-To sample from a checkpointed model, `python sample.py`.
+To sample from a trained model"
+```bash
+python sample.py
+```
 
 # Sample output
 
@@ -61,11 +67,6 @@ And six nor's mighty wind, I fairs, if?
 Messenger:
 My lank, nobles arms;
 ```
-
-# Roadmap
-- Add explanatory comments
-- Expose more command-line arguments
-- Compare accuracy and performance with char-rnn
 
 # Contribution
 Your comments (issues) and PRs are always welcome.
