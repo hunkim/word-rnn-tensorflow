@@ -53,7 +53,7 @@ class TextLoader():
         Returns vocabulary mapping and inverse vocabulary mapping.
         """
         # Build vocabulary
-        word_counts = collections.Counter(itertools.chain(*sentences))
+        word_counts = collections.Counter(sentences)
         # Mapping from index to word
         vocabulary_inv = [x[0] for x in word_counts.most_common()]
         vocabulary_inv = list(sorted(vocabulary_inv))
@@ -69,7 +69,7 @@ class TextLoader():
         #data = self.clean_str(data)
         x_text = data.split(" ")
 
-        self.vocab, self.words = self.build_vocab([x_text])
+        self.vocab, self.words = self.build_vocab(x_text)
         self.vocab_size = len(self.words)
 
         with open(vocab_file, 'wb') as f:
