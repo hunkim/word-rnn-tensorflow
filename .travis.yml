@@ -15,4 +15,4 @@ install:
 
 # command to run tests
 script:
-  - python -m unittest discover; 
+  - python -m unittest discover -s tests;
