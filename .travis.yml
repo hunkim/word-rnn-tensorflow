@@ -1,7 +1,12 @@
 language: python
 python:
   - "2.7"
+  - "3.4"
 # command to install dependencies
-install: "pip install -r requirements.txt"
+install:
+  - if [[ $TRAVIS_PYTHON_VERSION == '2.7' ]]; then pip install -r .py2requirements.txt; fi
+  - if [[ $TRAVIS_PYTHON_VERSION == 3* ]]; then pip install -r .py3requirements.txt; fi
 # command to run tests
-script: nosetests
+script:
+  - if [[ $TRAVIS_PYTHON_VERSION == '2.7' ]]; then python -m unittest discover; fi
+  - if [[ $TRAVIS_PYTHON_VERSION == 3* ]]; then python -m unittest discover; fi
