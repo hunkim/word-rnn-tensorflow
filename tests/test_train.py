@@ -7,7 +7,7 @@ class TestUtilsMethods(unittest.TestCase):
         self.data_loader = TextLoader("tests/test_data", batch_size=2, seq_length=5)
 
     def test_init(self):
-        print "Work in progress."
+        print ("Work in progress.")
 
 
 if __name__ == '__main__':
