@@ -23,7 +23,7 @@ class TestUtilsMethods(unittest.TestCase):
         self.assertItemsEqual(vocab_inv, ["I", "love", "cat"])
 
     def test_batch_vocab(self):
-        print np.array(self.data_loader.x_batches).shape
+        print (np.array(self.data_loader.x_batches).shape)
         self.assertItemsEqual(self.data_loader.x_batches[0][0][1:],
                               self.data_loader.y_batches[0][0][:-1])
         self.assertItemsEqual(self.data_loader.x_batches[0][1][1:],
