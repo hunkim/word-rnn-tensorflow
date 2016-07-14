@@ -1,6 +1,7 @@
 import unittest
 from utils import TextLoader
 import numpy as np
+from collections import Counter
 
 class TestUtilsMethods(unittest.TestCase):
     def setUp(self):
@@ -17,17 +18,17 @@ class TestUtilsMethods(unittest.TestCase):
         print (vocab, vocab_inv)
 
         # Must include I, love, and cat
-        self.assertItemsEqual(vocab, ["I", "love", "cat"])
+        self.assertEqual(Counter(list(vocab)), Counter(list(["I", "love", "cat"])))
         self.assertDictEqual(vocab, {'I': 0, 'love': 2, 'cat': 1})
 
-        self.assertItemsEqual(vocab_inv, ["I", "love", "cat"])
+        self.assertEqual(Counter(list(vocab_inv)), Counter(list(["I", "love", "cat"])))
 
     def test_batch_vocab(self):
         print (np.array(self.data_loader.x_batches).shape)
-        self.assertItemsEqual(self.data_loader.x_batches[0][0][1:],
-                              self.data_loader.y_batches[0][0][:-1])
-        self.assertItemsEqual(self.data_loader.x_batches[0][1][1:],
-                              self.data_loader.y_batches[0][1][:-1])
+        self.assertEqual(Counter(list(self.data_loader.x_batches[0][0][1:])),
+                              Counter(list(self.data_loader.y_batches[0][0][:-1])))
+        self.assertEqual(Counter(list(self.data_loader.x_batches[0][1][1:])),
+                              Counter(list(self.data_loader.y_batches[0][1][:-1])))
 
 
 if __name__ == '__main__':
