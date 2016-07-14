@@ -60,8 +60,8 @@ class Model():
 
     def sample(self, sess, words, vocab, num=200, prime='first all', sampling_type=1):
         state = self.cell.zero_state(1, tf.float32).eval()
-        prime = vocab.keys()[2]
-        print prime
+        prime = list(vocab.keys())[2]
+        print (prime)
         for word in [prime]:
             print (word)
             x = np.zeros((1, 1))
