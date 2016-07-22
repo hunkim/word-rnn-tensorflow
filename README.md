@@ -69,6 +69,11 @@ And six nor's mighty wind, I fairs, if?
 Messenger:
 My lank, nobles arms;
 ```
+# Projects
+If you have any project using this word-rnn, please let us know. I'll list up your project here.
+
+- http://bot.wpoem.com/ (Simple poem generator in Korean)
+ 
 
 # Contribution
 Your comments (issues) and PRs are always welcome.
