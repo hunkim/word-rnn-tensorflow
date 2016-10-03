@@ -75,7 +75,7 @@ class TextLoader():
         with open(vocab_file, 'wb') as f:
             cPickle.dump(self.words, f)
 
-        #The same operation liek this [self.vocab[word] for word in x_text]
+        #The same operation like this [self.vocab[word] for word in x_text]
         # index of words as our basic data
         self.tensor = np.array(list(map(self.vocab.get, x_text)))
         # Save the data to data.npy
