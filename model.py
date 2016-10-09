@@ -66,10 +66,10 @@ class Model():
         for word in prime.split()[:-1]:
             print (word)
             x = np.zeros((1, 1))
-            x[0, 0] = vocab[word]
+            x[0, 0] = vocab.get(word,0)
             feed = {self.input_data: x, self.initial_state:state}
             [state] = sess.run([self.final_state], feed)
-
+         
         def weighted_pick(weights):
             t = np.cumsum(weights)
             s = np.sum(weights)
