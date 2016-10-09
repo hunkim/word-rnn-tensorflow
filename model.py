@@ -75,7 +75,7 @@ class Model():
             return(int(np.searchsorted(t, np.random.rand(1)*s)))
 
         ret = prime
-        word = prime[-1]
+        word = prime.split()[-1]
         for n in range(num):
             x = np.zeros((1, 1))
             x[0, 0] = vocab.get(word,0)
