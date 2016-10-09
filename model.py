@@ -1,7 +1,7 @@
 import tensorflow as tf
 from tensorflow.python.ops import rnn_cell
 from tensorflow.python.ops import seq2seq
-
+import random
 import numpy as np
 
 class Model():
@@ -60,25 +60,26 @@ class Model():
 
     def sample(self, sess, words, vocab, num=200, prime='first all', sampling_type=1):
         state = sess.run(self.cell.zero_state(1, tf.float32))
-        prime = list(vocab.keys())[2]
+        if not len(prime) or prime == " ":
+            prime  = random.choice(list(vocab.keys()))    
         print (prime)
-        for word in [prime]:
+        for word in prime.split()[:-1]:
             print (word)
             x = np.zeros((1, 1))
-            x[0, 0] = vocab[word]
+            x[0, 0] = vocab.get(word,0)
             feed = {self.input_data: x, self.initial_state:state}
             [state] = sess.run([self.final_state], feed)
-
+         
         def weighted_pick(weights):
             t = np.cumsum(weights)
             s = np.sum(weights)
             return(int(np.searchsorted(t, np.random.rand(1)*s)))
 
         ret = prime
-        word = prime
+        word = prime.split()[-1]
         for n in range(num):
             x = np.zeros((1, 1))
-            x[0, 0] = vocab[word]
+            x[0, 0] = vocab.get(word,0)
             feed = {self.input_data: x, self.initial_state:state}
             [probs, state] = sess.run([self.probs, self.final_state], feed)
             p = probs[0]
