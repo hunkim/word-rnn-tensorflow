@@ -50,6 +50,7 @@ class Model():
                 [tf.ones([args.batch_size * args.seq_length])],
                 args.vocab_size)
         self.cost = tf.reduce_sum(loss) / args.batch_size / args.seq_length
+        tf.summary.scalar("cost", self.cost)
         self.final_state = last_state
         self.lr = tf.Variable(0.0, trainable=False)
         tvars = tf.trainable_variables()

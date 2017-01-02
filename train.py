@@ -81,7 +81,12 @@ def train(args):
 
     model = Model(args)
 
+    batch_pointer = tf.Variable(0, name="batch_pointer", trainable=False)
+    merged = tf.summary.merge_all()
+    train_writer = tf.summary.FileWriter('logs')
+
     with tf.Session() as sess:
+        train_writer.add_graph(sess.graph)
         tf.global_variables_initializer().run()
         saver = tf.train.Saver(tf.global_variables())
         # restore model
@@ -90,22 +95,33 @@ def train(args):
         for e in range(args.num_epochs):
             sess.run(tf.assign(model.lr, args.learning_rate * (args.decay_rate ** e)))
             data_loader.reset_batch_pointer()
+            if args.init_from is None:
+                assign_op = batch_pointer.assign(0)
+                sess.run(assign_op)
             state = sess.run(model.initial_state)
-            for b in range(data_loader.num_batches):
+            if args.init_from is not None:
+                data_loader.pointer = batch_pointer.eval()
+                args.init_from = None
+            for b in range(data_loader.pointer, data_loader.num_batches):
                 start = time.time()
                 x, y = data_loader.next_batch()
                 feed = {model.input_data: x, model.targets: y, model.initial_state: state}
-                train_loss, state, _ = sess.run([model.cost, model.final_state, model.train_op], feed)
+                summary, train_loss, state, _ = sess.run([merged, model.cost, model.final_state, model.train_op], feed)
+                train_writer.add_summary(summary, e * data_loader.num_batches + b)
+                assign_op = batch_pointer.assign(data_loader.pointer)
+                sess.run(assign_op)
                 end = time.time()
-                print("{}/{} (epoch {}), train_loss = {:.3f}, time/batch = {:.3f}" \
-                    .format(e * data_loader.num_batches + b,
-                            args.num_epochs * data_loader.num_batches,
-                            e, train_loss, end - start))
+                if (e * data_loader.num_batches + b) % args.batch_size == 0:
+                    print("{}/{} (epoch {}), train_loss = {:.3f}, time/batch = {:.3f}" \
+                        .format(e * data_loader.num_batches + b,
+                                args.num_epochs * data_loader.num_batches,
+                                e, train_loss, end - start))
                 if (e * data_loader.num_batches + b) % args.save_every == 0 \
                         or (e==args.num_epochs-1 and b == data_loader.num_batches-1): # save for the last result
                     checkpoint_path = os.path.join(args.save_dir, 'model.ckpt')
                     saver.save(sess, checkpoint_path, global_step = e * data_loader.num_batches + b)
                     print("model saved to {}".format(checkpoint_path))
+        train_writer.close()
 
 if __name__ == '__main__':
     main()
