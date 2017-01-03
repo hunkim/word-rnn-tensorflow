@@ -59,12 +59,15 @@ class Model():
         self.cost = tf.reduce_sum(loss) / args.batch_size / args.seq_length
         tf.summary.scalar("cost", self.cost)
         self.final_state = last_state
-        self.lr = tf.Variable(0.0, trainable=False)
+        self.global_step = tf.Variable(0, name='global_step', trainable=False)
+        self.lr = tf.train.exponential_decay(args.learning_rate, self.global_step,
+                                             args.decay_step, args.decay_rate)
+        tf.summary.scalar("learning_rate", self.lr)
         tvars = tf.trainable_variables()
         grads, _ = tf.clip_by_global_norm(tf.gradients(self.cost, tvars),
                 args.grad_clip)
         optimizer = tf.train.AdamOptimizer(self.lr)
-        self.train_op = optimizer.apply_gradients(zip(grads, tvars))
+        self.train_op = optimizer.apply_gradients(zip(grads, tvars), global_step=self.global_step)
 
     def sample(self, sess, words, vocab, num=200, prime='first all', sampling_type=1):
         state = sess.run(self.cell.zero_state(1, tf.float32))
