@@ -36,9 +36,23 @@ class Model():
         self.batch_time = tf.Variable(0.0, name="batch_time", trainable=False)
         tf.summary.scalar("time_batch", self.batch_time)
 
+        def variable_summaries(var):
+            """Attach a lot of summaries to a Tensor (for TensorBoard visualization)."""
+            with tf.name_scope('summaries'):
+                mean = tf.reduce_mean(var)
+                tf.summary.scalar('mean', mean)
+                #with tf.name_scope('stddev'):
+                #   stddev = tf.sqrt(tf.reduce_mean(tf.square(var - mean)))
+                #tf.summary.scalar('stddev', stddev)
+                tf.summary.scalar('max', tf.reduce_max(var))
+                tf.summary.scalar('min', tf.reduce_min(var))
+                #tf.summary.histogram('histogram', var)
+
         with tf.variable_scope('rnnlm'):
             softmax_w = tf.get_variable("softmax_w", [args.rnn_size, args.vocab_size])
+            variable_summaries(softmax_w)
             softmax_b = tf.get_variable("softmax_b", [args.vocab_size])
+            variable_summaries(softmax_b)
             with tf.device("/cpu:0"):
                 embedding = tf.get_variable("embedding", [args.vocab_size, args.rnn_size])
                 inputs = tf.nn.embedding_lookup(embedding, self.input_data)
