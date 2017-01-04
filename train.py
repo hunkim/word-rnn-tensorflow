@@ -106,7 +106,6 @@ def train(args):
             if args.init_from is not None:
                 data_loader.pointer = model.batch_pointer.eval()
                 args.init_from = None
-            speed = 0
             for b in range(data_loader.pointer, data_loader.num_batches):
                 start = time.time()
                 x, y = data_loader.next_batch()
