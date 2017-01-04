@@ -93,11 +93,13 @@ def train(args):
         # restore model
         if args.init_from is not None:
             saver.restore(sess, ckpt.model_checkpoint_path)
-        for e in range(args.num_epochs):
+        for e in range(model.epoch_pointer.eval(), args.num_epochs):
             sess.run(tf.assign(model.lr, args.learning_rate * (args.decay_rate ** e)))
             data_loader.reset_batch_pointer()
             if args.init_from is None:
                 assign_op = model.batch_pointer.assign(0)
+                sess.run(assign_op)
+                assign_op = model.epoch_pointer.assign(e)
                 sess.run(assign_op)
             state = sess.run(model.initial_state)
             if args.init_from is not None:
@@ -108,9 +110,9 @@ def train(args):
                 start = time.time()
                 x, y = data_loader.next_batch()
                 feed = {model.input_data: x, model.targets: y, model.initial_state: state,
-                        model.batch_pointer: data_loader.pointer, model.batch_time: speed}
-                summary, train_loss, state, _ = sess.run([merged, model.cost, model.final_state,
-                                                          model.train_op], feed)
+                        model.batch_time: speed}
+                summary, train_loss, state, _, _ = sess.run([merged, model.cost, model.final_state,
+                                                          model.train_op, model.inc_batch_pointer_op], feed)
                 train_writer.add_summary(summary, e * data_loader.num_batches + b)
                 end = time.time()
                 speed = end - start
