@@ -81,7 +81,6 @@ def train(args):
 
     model = Model(args)
 
-    batch_pointer = tf.Variable(0, name="batch_pointer", trainable=False)
     merged = tf.summary.merge_all()
     train_writer = tf.summary.FileWriter('logs')
 
@@ -96,20 +95,18 @@ def train(args):
             sess.run(tf.assign(model.lr, args.learning_rate * (args.decay_rate ** e)))
             data_loader.reset_batch_pointer()
             if args.init_from is None:
-                assign_op = batch_pointer.assign(0)
+                assign_op = model.batch_pointer.assign(0)
                 sess.run(assign_op)
             state = sess.run(model.initial_state)
             if args.init_from is not None:
-                data_loader.pointer = batch_pointer.eval()
+                data_loader.pointer = model.batch_pointer.eval()
                 args.init_from = None
             for b in range(data_loader.pointer, data_loader.num_batches):
                 start = time.time()
                 x, y = data_loader.next_batch()
-                feed = {model.input_data: x, model.targets: y, model.initial_state: state}
+                feed = {model.input_data: x, model.targets: y, model.initial_state: state, model.batch_pointer: data_loader.pointer}
                 summary, train_loss, state, _ = sess.run([merged, model.cost, model.final_state, model.train_op], feed)
                 train_writer.add_summary(summary, e * data_loader.num_batches + b)
-                assign_op = batch_pointer.assign(data_loader.pointer)
-                sess.run(assign_op)
                 end = time.time()
                 if (e * data_loader.num_batches + b) % args.batch_size == 0:
                     print("{}/{} (epoch {}), train_loss = {:.3f}, time/batch = {:.3f}" \
