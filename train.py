@@ -94,16 +94,16 @@ def train(args):
         for e in range(model.epoch_pointer.eval(), args.num_epochs):
             sess.run(tf.assign(model.lr, args.learning_rate * (args.decay_rate ** e)))
             data_loader.reset_batch_pointer()
+            state = sess.run(model.initial_state)
+            speed = 0
             if args.init_from is None:
                 assign_op = model.batch_pointer.assign(0)
                 sess.run(assign_op)
                 assign_op = model.epoch_pointer.assign(e)
                 sess.run(assign_op)
-            state = sess.run(model.initial_state)
             if args.init_from is not None:
                 data_loader.pointer = model.batch_pointer.eval()
                 args.init_from = None
-            speed = 0
             for b in range(data_loader.pointer, data_loader.num_batches):
                 start = time.time()
                 x, y = data_loader.next_batch()
