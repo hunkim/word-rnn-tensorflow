@@ -101,18 +101,22 @@ def train(args):
             if args.init_from is not None:
                 data_loader.pointer = model.batch_pointer.eval()
                 args.init_from = None
+            speed = 0
             for b in range(data_loader.pointer, data_loader.num_batches):
                 start = time.time()
                 x, y = data_loader.next_batch()
-                feed = {model.input_data: x, model.targets: y, model.initial_state: state, model.batch_pointer: data_loader.pointer}
-                summary, train_loss, state, _ = sess.run([merged, model.cost, model.final_state, model.train_op], feed)
+                feed = {model.input_data: x, model.targets: y, model.initial_state: state,
+                        model.batch_pointer: data_loader.pointer, model.batch_time: speed}
+                summary, train_loss, state, _ = sess.run([merged, model.cost, model.final_state,
+                                                          model.train_op], feed)
                 train_writer.add_summary(summary, e * data_loader.num_batches + b)
                 end = time.time()
+                speed = end - start
                 if (e * data_loader.num_batches + b) % args.batch_size == 0:
                     print("{}/{} (epoch {}), train_loss = {:.3f}, time/batch = {:.3f}" \
                         .format(e * data_loader.num_batches + b,
                                 args.num_epochs * data_loader.num_batches,
-                                e, train_loss, end - start))
+                                e, train_loss, speed))
                 if (e * data_loader.num_batches + b) % args.save_every == 0 \
                         or (e==args.num_epochs-1 and b == data_loader.num_batches-1): # save for the last result
                     checkpoint_path = os.path.join(args.save_dir, 'model.ckpt')
