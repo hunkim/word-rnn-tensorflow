@@ -116,7 +116,6 @@ def train(args):
                                                              model.train_op, model.inc_batch_pointer_op], feed)
                 train_writer.add_summary(summary, e * data_loader.num_batches + b)
                 speed = time.time() - start
-                speed = end - start
                 if (e * data_loader.num_batches + b) % args.batch_size == 0:
                     print("{}/{} (epoch {}), lr = {:.6f}, train_loss = {:.3f}, time/batch = {:.3f}" \
                           .format(e * data_loader.num_batches + b,
