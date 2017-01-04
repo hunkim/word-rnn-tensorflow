@@ -27,7 +27,9 @@ class Model():
         self.input_data = tf.placeholder(tf.int32, [args.batch_size, args.seq_length])
         self.targets = tf.placeholder(tf.int32, [args.batch_size, args.seq_length])
         self.initial_state = cell.zero_state(args.batch_size, tf.float32)
-        self.batch_pointer = tf.Variable(0, name="batch_pointer", trainable=False)
+        self.batch_pointer = tf.Variable(0, name="batch_pointer", trainable=False, dtype=tf.int32)
+        self.inc_batch_pointer_op = tf.assign(self.batch_pointer, self.batch_pointer + 1)
+        self.epoch_pointer = tf.Variable(0, name="epoch_pointer", trainable=False)
         self.batch_time = tf.Variable(0.0, name="batch_time", trainable=False)
         tf.summary.scalar("time_batch", self.batch_time)
 
