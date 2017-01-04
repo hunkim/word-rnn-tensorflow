@@ -94,12 +94,15 @@ def train(args):
         # restore model
         if args.init_from is not None:
             saver.restore(sess, ckpt.model_checkpoint_path)
-        for e in range(args.num_epochs):
+        for e in range(model.epoch_pointer.eval(), args.num_epochs):
             data_loader.reset_batch_pointer()
+            state = sess.run(model.initial_state)
+            speed = 0
             if args.init_from is None:
                 assign_op = model.batch_pointer.assign(0)
                 sess.run(assign_op)
-            state = sess.run(model.initial_state)
+                assign_op = model.epoch_pointer.assign(e)
+                sess.run(assign_op)
             if args.init_from is not None:
                 data_loader.pointer = model.batch_pointer.eval()
                 args.init_from = None
@@ -108,11 +111,11 @@ def train(args):
                 start = time.time()
                 x, y = data_loader.next_batch()
                 feed = {model.input_data: x, model.targets: y, model.initial_state: state,
-                        model.batch_pointer: data_loader.pointer, model.batch_time: speed}
-                summary, train_loss, lr, state, _ = sess.run([merged, model.cost, model.lr,
-                                                              model.final_state, model.train_op], feed)
+                        model.batch_time: speed}
+                summary, train_loss, lr, state, _, _ = sess.run([merged, model.cost, model.lr, model.final_state,
+                                                             model.train_op, model.inc_batch_pointer_op], feed)
                 train_writer.add_summary(summary, e * data_loader.num_batches + b)
-                end = time.time()
+                speed = time.time() - start
                 speed = end - start
                 if (e * data_loader.num_batches + b) % args.batch_size == 0:
                     print("{}/{} (epoch {}), lr = {:.6f}, train_loss = {:.3f}, time/batch = {:.3f}" \
