@@ -114,8 +114,7 @@ def train(args):
                 summary, train_loss, state, _, _ = sess.run([merged, model.cost, model.final_state,
                                                           model.train_op, model.inc_batch_pointer_op], feed)
                 train_writer.add_summary(summary, e * data_loader.num_batches + b)
-                end = time.time()
-                speed = end - start
+                speed = time.time() - start
                 if (e * data_loader.num_batches + b) % args.batch_size == 0:
                     print("{}/{} (epoch {}), train_loss = {:.3f}, time/batch = {:.3f}" \
                         .format(e * data_loader.num_batches + b,
