@@ -38,6 +38,8 @@ def main():
                        help='decay rate for rmsprop')
     parser.add_argument('--keep_prob', type=float, default=1.0,
                        help = 'probability of keeping weights in the dropout layer')
+    parser.add_argument('--gpu_mem', type=float, default=0.666,
+                       help='% of gpu memory to be allocated to this process. Default is 66.6%')
     parser.add_argument('--init_from', type=str, default=None,
                        help="""continue training from saved model at this path. Path must contain files saved by previous training process:
                             'config.pkl'        : configuration;
@@ -85,8 +87,9 @@ def train(args):
 
     merged = tf.summary.merge_all()
     train_writer = tf.summary.FileWriter('logs')
+    gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=args.gpu_mem)
 
-    with tf.Session() as sess:
+    with tf.Session(config=tf.ConfigProto(gpu_options=gpu_options)) as sess:
         train_writer.add_graph(sess.graph)
         tf.global_variables_initializer().run()
         saver = tf.train.Saver(tf.global_variables())
