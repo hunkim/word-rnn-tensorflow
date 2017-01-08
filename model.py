@@ -4,6 +4,8 @@ from tensorflow.python.ops import seq2seq
 import random
 import numpy as np
 
+from beam import BeamSearch
+
 class Model():
     def __init__(self, args, infer=False):
         self.args = args
@@ -33,9 +35,23 @@ class Model():
         self.batch_time = tf.Variable(0.0, name="batch_time", trainable=False)
         tf.summary.scalar("time_batch", self.batch_time)
 
+        def variable_summaries(var):
+            """Attach a lot of summaries to a Tensor (for TensorBoard visualization)."""
+            with tf.name_scope('summaries'):
+                mean = tf.reduce_mean(var)
+                tf.summary.scalar('mean', mean)
+                #with tf.name_scope('stddev'):
+                #   stddev = tf.sqrt(tf.reduce_mean(tf.square(var - mean)))
+                #tf.summary.scalar('stddev', stddev)
+                tf.summary.scalar('max', tf.reduce_max(var))
+                tf.summary.scalar('min', tf.reduce_min(var))
+                #tf.summary.histogram('histogram', var)
+
         with tf.variable_scope('rnnlm'):
             softmax_w = tf.get_variable("softmax_w", [args.rnn_size, args.vocab_size])
+            variable_summaries(softmax_w)
             softmax_b = tf.get_variable("softmax_b", [args.vocab_size])
+            variable_summaries(softmax_b)
             with tf.device("/cpu:0"):
                 embedding = tf.get_variable("embedding", [args.vocab_size, args.rnn_size])
                 inputs = tf.split(1, args.seq_length, tf.nn.embedding_lookup(embedding, self.input_data))
@@ -64,7 +80,7 @@ class Model():
         optimizer = tf.train.AdamOptimizer(self.lr)
         self.train_op = optimizer.apply_gradients(zip(grads, tvars))
 
-    def sample(self, sess, words, vocab, num=200, prime='first all', sampling_type=1):
+    def sample(self, sess, words, vocab, num=200, prime='first all', sampling_type=1, pick=0):
         state = sess.run(self.cell.zero_state(1, tf.float32))
         if not len(prime) or prime == " ":
             prime  = random.choice(list(vocab.keys()))    
@@ -81,6 +97,14 @@ class Model():
             s = np.sum(weights)
             return(int(np.searchsorted(t, np.random.rand(1)*s)))
 
+        def beam_search_pick(weights):
+            probs[0] = weights
+            samples, scores = BeamSearch(probs).beamsearch(None, vocab.get(prime), None, 2, len(weights), False)
+            sampleweights = samples[np.argmax(scores)]
+            t = np.cumsum(sampleweights)
+            s = np.sum(sampleweights)
+            return(int(np.searchsorted(t, np.random.rand(1)*s)))
+
         ret = prime
         word = prime.split()[-1]
         for n in range(num):
@@ -90,15 +114,18 @@ class Model():
             [probs, state] = sess.run([self.probs, self.final_state], feed)
             p = probs[0]
 
-            if sampling_type == 0:
-                sample = np.argmax(p)
-            elif sampling_type == 2:
-                if word == '\n':
-                    sample = weighted_pick(p)
-                else:
+            if pick == 1:
+                if sampling_type == 0:
                     sample = np.argmax(p)
-            else: # sampling_type == 1 default:
-                sample = weighted_pick(p)
+                elif sampling_type == 2:
+                    if word == '\n':
+                        sample = weighted_pick(p)
+                    else:
+                        sample = np.argmax(p)
+                else: # sampling_type == 1 default:
+                    sample = weighted_pick(p)
+            elif pick == 2:
+                sample = beam_search_pick(p)
 
             pred = words[sample]
             ret += ' ' + pred
