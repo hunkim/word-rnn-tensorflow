@@ -1,6 +1,6 @@
 import tensorflow as tf
-from tensorflow.python.ops import seq2seq
 from tensorflow.contrib import rnn
+from tensorflow.contrib import legacy_seq2seq
 import random
 import numpy as np
 
@@ -66,7 +66,7 @@ class Model():
         output = tf.reshape(tf.concat(1, outputs), [-1, args.rnn_size])
         self.logits = tf.matmul(output, softmax_w) + softmax_b
         self.probs = tf.nn.softmax(self.logits)
-        loss = seq2seq.sequence_loss_by_example([self.logits],
+        loss = legacy_seq2seq.sequence_loss_by_example([self.logits],
                 [tf.reshape(self.targets, [-1])],
                 [tf.ones([args.batch_size * args.seq_length])],
                 args.vocab_size)
