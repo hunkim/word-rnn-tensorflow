@@ -12,7 +12,6 @@ from model import Model
 
 def main():
     parser = argparse.ArgumentParser()
-    # TODO: add --log_dir
     parser.add_argument('--data_dir', type=str, default='data/tinyshakespeare',
                        help='data directory containing input.txt')
     parser.add_argument('--log_dir', type=str, default='logs',
