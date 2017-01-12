@@ -7,9 +7,9 @@ import numpy as np
 from beam import BeamSearch
 
 class Model():
-    def __init__(self, args, infer=False):
+    def __init__(self, args, training=True):
         self.args = args
-        if infer:
+        if not training:
             args.batch_size = 1
             args.seq_length = 1
 
@@ -23,6 +23,9 @@ class Model():
             raise Exception("model type not supported: {}".format(args.model))
 
         cell = cell_fn(args.rnn_size)
+
+        if training and args.keep_prob < 1:
+            cell = rnn_cell.DropoutWrapper(cell, output_keep_prob=args.keep_prob)
 
         self.cell = cell = rnn_cell.MultiRNNCell([cell] * args.num_layers)
 
@@ -54,7 +57,10 @@ class Model():
             variable_summaries(softmax_b)
             with tf.device("/cpu:0"):
                 embedding = tf.get_variable("embedding", [args.vocab_size, args.rnn_size])
-                inputs = tf.split(1, args.seq_length, tf.nn.embedding_lookup(embedding, self.input_data))
+                inputs = tf.nn.embedding_lookup(embedding, self.input_data)
+                if training and args.keep_prob < 1:
+                    inputs = tf.nn.dropout(inputs, args.keep_prob)
+                inputs = tf.split(1, args.seq_length, inputs)
                 inputs = [tf.squeeze(input_, [1]) for input_ in inputs]
 
         def loop(prev, _):
@@ -62,7 +68,8 @@ class Model():
             prev_symbol = tf.stop_gradient(tf.argmax(prev, 1))
             return tf.nn.embedding_lookup(embedding, prev_symbol)
 
-        outputs, last_state = seq2seq.rnn_decoder(inputs, self.initial_state, cell, loop_function=loop if infer else None, scope='rnnlm')
+        outputs, last_state = seq2seq.rnn_decoder(inputs, self.initial_state, cell,
+                                                  loop_function=loop if not training else None, scope='rnnlm')
         output = tf.reshape(tf.concat(1, outputs), [-1, args.rnn_size])
         self.logits = tf.matmul(output, softmax_w) + softmax_b
         self.probs = tf.nn.softmax(self.logits)
