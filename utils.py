@@ -46,7 +46,6 @@ class TextLoader():
         string = re.sub(r"\s{2,}", " ", string)
         return string.strip().lower()
 
-
     def build_vocab(self, sentences):
         """
         Builds a vocabulary mapping from word to index based on the sentences.
@@ -104,7 +103,6 @@ class TextLoader():
         ydata[-1] = xdata[0]
         self.x_batches = np.split(xdata.reshape(self.batch_size, -1), self.num_batches, 1)
         self.y_batches = np.split(ydata.reshape(self.batch_size, -1), self.num_batches, 1)
-
 
     def next_batch(self):
         x, y = self.x_batches[self.pointer], self.y_batches[self.pointer]

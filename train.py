@@ -102,8 +102,6 @@ def train(args):
             state = sess.run(model.initial_state)
             speed = 0
             if args.init_from is None:
-                assign_op = model.batch_pointer.assign(0)
-                sess.run(assign_op)
                 assign_op = model.epoch_pointer.assign(e)
                 sess.run(assign_op)
             if args.init_from is not None:
