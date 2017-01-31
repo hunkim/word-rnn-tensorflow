@@ -81,40 +81,57 @@ class Model():
         self.train_op = optimizer.apply_gradients(zip(grads, tvars))
 
     def sample(self, sess, words, vocab, num=200, prime='first all', sampling_type=1, pick=0):
-        state = sess.run(self.cell.zero_state(1, tf.float32))
-        if not len(prime) or prime == " ":
-            prime  = random.choice(list(vocab.keys()))    
-        print (prime)
-        for word in prime.split()[:-1]:
-            print (word)
-            x = np.zeros((1, 1))
-            x[0, 0] = vocab.get(word,0)
-            feed = {self.input_data: x, self.initial_state:state}
-            [state] = sess.run([self.final_state], feed)
-         
         def weighted_pick(weights):
             t = np.cumsum(weights)
             s = np.sum(weights)
             return(int(np.searchsorted(t, np.random.rand(1)*s)))
 
-        def beam_search_pick(weights):
-            probs[0] = weights
-            samples, scores = BeamSearch(probs).beamsearch(None, vocab.get(prime), None, 2, len(weights), False)
-            sampleweights = samples[np.argmax(scores)]
-            t = np.cumsum(sampleweights)
-            s = np.sum(sampleweights)
-            return(int(np.searchsorted(t, np.random.rand(1)*s)))
+        def beam_search_predict(sample, state):
+            """Returns the updated probability distribution (`probs`) and
+            `state` for a given `sample`. `sample` should be a sequence of
+            vocabulary labels, with the last word to be tested against the RNN.
+            """
 
-        ret = prime
-        word = prime.split()[-1]
-        for n in range(num):
             x = np.zeros((1, 1))
-            x[0, 0] = vocab.get(word,0)
-            feed = {self.input_data: x, self.initial_state:state}
-            [probs, state] = sess.run([self.probs, self.final_state], feed)
-            p = probs[0]
+            x[0, 0] = vocab.get(sample[-1], 0)
+            feed = {self.input_data: x, self.initial_state: state}
+            [probs, final_state] = sess.run([self.probs, self.final_state],
+                                            feed)
+            return probs, final_state
 
-            if pick == 1:
+        def beam_search_pick(prime, width=2):
+            """Returns the beam search pick."""
+            if not len(prime) or prime == ' ':
+                prime = random.choice(list(vocab.keys()))
+            prime_labels = [vocab.get(word, 0) for word in prime.split()]
+            bs = BeamSearch(beam_search_predict,
+                            sess.run(self.cell.zero_state(1, tf.float32)),
+                            prime_labels)
+            samples, scores = bs.search(None, None, k=width, maxsample=num)
+            return samples[np.argmin(scores)]
+
+        ret = ''
+        if pick == 1:
+            state = sess.run(self.cell.zero_state(1, tf.float32))
+            if not len(prime) or prime == ' ':
+                prime  = random.choice(list(vocab.keys()))
+            print (prime)
+            for word in prime.split()[:-1]:
+                print (word)
+                x = np.zeros((1, 1))
+                x[0, 0] = vocab.get(word,0)
+                feed = {self.input_data: x, self.initial_state:state}
+                [state] = sess.run([self.final_state], feed)
+
+            ret = prime
+            word = prime.split()[-1]
+            for n in range(num):
+                x = np.zeros((1, 1))
+                x[0, 0] = vocab.get(word, 0)
+                feed = {self.input_data: x, self.initial_state:state}
+                [probs, state] = sess.run([self.probs, self.final_state], feed)
+                p = probs[0]
+
                 if sampling_type == 0:
                     sample = np.argmax(p)
                 elif sampling_type == 2:
@@ -124,12 +141,12 @@ class Model():
                         sample = np.argmax(p)
                 else: # sampling_type == 1 default:
                     sample = weighted_pick(p)
-            elif pick == 2:
-                sample = beam_search_pick(p)
 
-            pred = words[sample]
-            ret += ' ' + pred
-            word = pred
+                pred = words[sample]
+                ret += ' ' + pred
+                word = pred
+        elif pick == 2:
+            pred = beam_search_pick(prime)
+            for i, label in enumerate(pred):
+                ret += ' ' + words[label] if i > 0 else words[label]
         return ret
-
-
