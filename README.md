@@ -28,7 +28,7 @@ python sample.py --pick 2 --width 4
 
 # Sample output
 
-## Word-RNN
+### Word-RNN
 ```
 LEONTES:
 Why, my Irish time?
@@ -54,52 +54,7 @@ That He being and
 full of toad, they knew me to joy.
 ```
 
-## Word-RNN (with beam search)
-```
-KING RICHARD III:
-you, by thou and and be not made at London with my legs.
-
-ROMEO:
-This is the quarrel; for this fellow: ho?
-
-RATCLIFF:
-I pray thee, moralize them.
-
-FERDINAND:
-This is fairy gold, boy, or 'twill do more than a man that calls upon me?
-reflect I not with the basilisk: I have Forbidden bandying in chance,
-
-GREGORY:
-and fret, that I have heard the princess As that she hath been deposed;
-Or late: farewell; my lord. Light to my boon.
-
-LADY CAPULET:
-I will not speak!
-
-KING RICHARD II:
-Marshal, Lartius, thou art,
-Commit'st my abilities are no more doublets thanbacks, thou takest,
-Within the morning, and my advancement?
-I must not be conducted.
-
-DUKE VINCENTIO:
-Repent you the time to visit, I am not strangely in my mouth,
-those that was germane to him, as thou talk'st of contrary.
-
-KING RICHARD II:
-Marshal, Lartius, thou fortunate!
-
-MONTAGUE:
-Comfort, my lord; and say you shall be stoned;
-but my heart shall have a man as stead me thy appointment,
-give me thy brother exercise;
-
-BUCKINGHAM:
-I pray you, mark your penitence, if it be violent, As when I would not disdain.
-```
-
-## Char-RNN
-
+### Char-RNN
 ```
 ESCALUS:
 What is our honours, such a Richard story
@@ -120,6 +75,66 @@ And six nor's mighty wind, I fairs, if?
 Messenger:
 My lank, nobles arms;
 ```
+
+## Beam search
+
+Beam search differs from the other `--pick` options in that it does not greedily
+pick single words; rather, it expands the most promising nodes and keeps a
+running score for each beam.
+
+### Word-RNN (with beam search)
+```
+# python sample.py --prime "KING RICHARD III:" -n 100 --pick 2 --width 4
+
+KING RICHARD III:
+you, and and and and have been to be hanged, I am not to be touched?
+
+Provost:
+A Bohemian born, for tying his own train,
+Forthwith by all that converses more with a crow-keeper;
+I have drunk, Broach'd with the acorn cradled. Follow.
+
+FERDINAND:
+Who would not be conducted.
+
+BISHOP OF ELY:
+If you have been a-bed an acre of barren ground, hath holy;
+I warrant, my lord restored of noon.
+
+ISABELLA:
+'Save my master and his shortness whisper me to the pedlar;
+Money's a medler.
+That I will pamper it to complain.
+
+VOLUMNIA:
+Indeed, I am
+```
+
+### Word-RNN (without beam search)
+```
+# python sample.py --prime "KING RICHARD III:" -n 100
+
+KING RICHARD III:
+marry, so and unto the wind have yours;
+And thou Juliet, sir?
+
+JULIET:
+Well, wherefore speak your disposition cousin;
+May thee flatter.
+My hand will answer him;
+e not to your Mariana Below these those and take this life,
+That stir not light of reason.
+The time Lucentio keeps a root from you.
+Cursed be his potency,
+It was my neighbour till the birth and I drank stay.
+
+MENENIUS:
+Here's the matter,
+I know take this sour place,
+they know allegiance Had made you guilty.
+You do her bear comfort him between him or our noble bosom he did Bolingbroke's
+```
+
 # Projects
 If you have any project using this word-rnn, please let us know. I'll list up your project here.
 
