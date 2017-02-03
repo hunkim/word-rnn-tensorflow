@@ -14,14 +14,21 @@ To train with default parameters on the tinyshakespeare corpus, run:
 python train.py
 ```
 
-To sample from a trained model"
+To sample from a trained model
 ```bash
 python sample.py
 ```
 
+To pick using beam search, use the `--pick` parameter. Beam search can be
+further customized using the `--width` parameter, which sets the number of beams
+to search with. For example:
+```bash
+python sample.py --pick 2 --width 4
+```
+
 # Sample output
 
-## Word-RNN
+### Word-RNN
 ```
 LEONTES:
 Why, my Irish time?
@@ -47,8 +54,7 @@ That He being and
 full of toad, they knew me to joy.
 ```
 
-## Char-RNN
-
+### Char-RNN
 ```
 ESCALUS:
 What is our honours, such a Richard story
@@ -69,11 +75,71 @@ And six nor's mighty wind, I fairs, if?
 Messenger:
 My lank, nobles arms;
 ```
+
+## Beam search
+
+Beam search differs from the other `--pick` options in that it does not greedily
+pick single words; rather, it expands the most promising nodes and keeps a
+running score for each beam.
+
+### Word-RNN (with beam search)
+```
+# python sample.py --prime "KING RICHARD III:" -n 100 --pick 2 --width 4
+
+KING RICHARD III:
+you, and and and and have been to be hanged, I am not to be touched?
+
+Provost:
+A Bohemian born, for tying his own train,
+Forthwith by all that converses more with a crow-keeper;
+I have drunk, Broach'd with the acorn cradled. Follow.
+
+FERDINAND:
+Who would not be conducted.
+
+BISHOP OF ELY:
+If you have been a-bed an acre of barren ground, hath holy;
+I warrant, my lord restored of noon.
+
+ISABELLA:
+'Save my master and his shortness whisper me to the pedlar;
+Money's a medler.
+That I will pamper it to complain.
+
+VOLUMNIA:
+Indeed, I am
+```
+
+### Word-RNN (without beam search)
+```
+# python sample.py --prime "KING RICHARD III:" -n 100
+
+KING RICHARD III:
+marry, so and unto the wind have yours;
+And thou Juliet, sir?
+
+JULIET:
+Well, wherefore speak your disposition cousin;
+May thee flatter.
+My hand will answer him;
+e not to your Mariana Below these those and take this life,
+That stir not light of reason.
+The time Lucentio keeps a root from you.
+Cursed be his potency,
+It was my neighbour till the birth and I drank stay.
+
+MENENIUS:
+Here's the matter,
+I know take this sour place,
+they know allegiance Had made you guilty.
+You do her bear comfort him between him or our noble bosom he did Bolingbroke's
+```
+
 # Projects
 If you have any project using this word-rnn, please let us know. I'll list up your project here.
 
 - http://bot.wpoem.com/ (Simple poem generator in Korean)
- 
+
 
 # Contribution
 Your comments (issues) and PRs are always welcome.
