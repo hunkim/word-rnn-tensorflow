@@ -80,7 +80,7 @@ class Model():
         optimizer = tf.train.AdamOptimizer(self.lr)
         self.train_op = optimizer.apply_gradients(zip(grads, tvars))
 
-    def sample(self, sess, words, vocab, num=200, prime='first all', sampling_type=1, pick=0):
+    def sample(self, sess, words, vocab, num=200, prime='first all', sampling_type=1, pick=0, width=4):
         def weighted_pick(weights):
             t = np.cumsum(weights)
             s = np.sum(weights)
@@ -93,13 +93,13 @@ class Model():
             """
 
             x = np.zeros((1, 1))
-            x[0, 0] = vocab.get(sample[-1], 0)
+            x[0, 0] = sample[-1]
             feed = {self.input_data: x, self.initial_state: state}
             [probs, final_state] = sess.run([self.probs, self.final_state],
                                             feed)
             return probs, final_state
 
-        def beam_search_pick(prime, width=2):
+        def beam_search_pick(prime, width):
             """Returns the beam search pick."""
             if not len(prime) or prime == ' ':
                 prime = random.choice(list(vocab.keys()))
@@ -146,7 +146,7 @@ class Model():
                 ret += ' ' + pred
                 word = pred
         elif pick == 2:
-            pred = beam_search_pick(prime)
+            pred = beam_search_pick(prime, width)
             for i, label in enumerate(pred):
                 ret += ' ' + words[label] if i > 0 else words[label]
         return ret

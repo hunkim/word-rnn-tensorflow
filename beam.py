@@ -13,9 +13,12 @@ class BeamSearch():
             initial_state:
                 The initial state of the RNN.
             prime_labels:
-                A list of labels corresponding to the priming text.
+                A list of labels corresponding to the priming text. This must
+                not be empty.
         """
 
+        if not prime_labels:
+            raise ValueError('prime_labels must be a non-empty list.')
         self.predict = predict
         self.initial_state = initial_state
         self.prime_labels = prime_labels
@@ -43,9 +46,13 @@ class BeamSearch():
         prime_sample = []
         prime_score = 0
         prime_state = self.initial_state
+
         # Initialize the live sample with the prime.
         for i, label in enumerate(self.prime_labels):
             prime_sample.append(label)
+
+            # The first word does not contribute to the score as the probs have
+            # not yet been determined.
             if i > 0:
                 prime_score = prime_score - np.log(probs[0, label])
             probs, prime_state = self.predict(prime_sample, prime_state)
@@ -61,8 +68,6 @@ class BeamSearch():
         live_states = [prime_state]
 
         while live_k and dead_k < k:
-            probs, live_states = self.predict_samples(live_samples, live_states)
-
             # total score for every sample is sum of -log of word prb
             cand_scores = np.array(live_scores)[:, None] - np.log(probs)
             if not use_unk and oov is not None:
@@ -91,5 +96,8 @@ class BeamSearch():
             live_scores = [s for s, z in zip(live_scores, zombie) if not z]
             live_states = [s for s, z in zip(live_states, zombie) if not z]
             live_k = len(live_samples)
+
+            # Finally, compute the next-step probabilities and states.
+            probs, live_states = self.predict_samples(live_samples, live_states)
 
         return dead_samples + live_samples, dead_scores + live_scores
