@@ -22,9 +22,12 @@ class Model():
         else:
             raise Exception("model type not supported: {}".format(args.model))
 
-        cell = cell_fn(args.rnn_size)
+        cells = []
+        for _ in range(args.num_layers):
+            cell = cell_fn(args.rnn_size)
+            cells.append(cell)
 
-        self.cell = cell = rnn.MultiRNNCell([cell] * args.num_layers)
+        self.cell = cell = rnn.MultiRNNCell(cells)
 
         self.input_data = tf.placeholder(tf.int32, [args.batch_size, args.seq_length])
         self.targets = tf.placeholder(tf.int32, [args.batch_size, args.seq_length])
