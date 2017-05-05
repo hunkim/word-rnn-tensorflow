@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import os
+import codecs
 import collections
 from six.moves import cPickle
 import numpy as np
@@ -7,7 +8,7 @@ import re
 import itertools
 
 class TextLoader():
-    def __init__(self, data_dir, batch_size, seq_length):
+    def __init__(self, data_dir, batch_size, seq_length, encoding=None):
         self.data_dir = data_dir
         self.batch_size = batch_size
         self.seq_length = seq_length
@@ -19,7 +20,7 @@ class TextLoader():
         # Let's not read voca and data from file. We many change them.
         if True or not (os.path.exists(vocab_file) and os.path.exists(tensor_file)):
             print("reading text file")
-            self.preprocess(input_file, vocab_file, tensor_file)
+            self.preprocess(input_file, vocab_file, tensor_file, encoding)
         else:
             print("loading preprocessed files")
             self.load_preprocessed(vocab_file, tensor_file)
@@ -60,8 +61,8 @@ class TextLoader():
         vocabulary = {x: i for i, x in enumerate(vocabulary_inv)}
         return [vocabulary, vocabulary_inv]
 
-    def preprocess(self, input_file, vocab_file, tensor_file):
-        with open(input_file, "r") as f:
+    def preprocess(self, input_file, vocab_file, tensor_file, encoding):
+        with codecs.open(input_file, "r", encoding=encoding) as f:
             data = f.read()
 
         # Optional text cleaning or make them lower case, etc.

@@ -14,6 +14,8 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--data_dir', type=str, default='data/tinyshakespeare',
                        help='data directory containing input.txt')
+    parser.add_argument('--input_encoding', type=str, default=None,
+                       help='character encoding of input.txt, from https://docs.python.org/3/library/codecs.html#standard-encodings')
     parser.add_argument('--log_dir', type=str, default='logs',
                        help='directory containing tensorboard logs')
     parser.add_argument('--save_dir', type=str, default='save',
@@ -39,7 +41,7 @@ def main():
     parser.add_argument('--decay_rate', type=float, default=0.97,
                        help='decay rate for rmsprop')
     parser.add_argument('--gpu_mem', type=float, default=0.666,
-                       help='% of gpu memory to be allocated to this process. Default is 66.6%')
+                       help='%% of gpu memory to be allocated to this process. Default is 66.6%%')
     parser.add_argument('--init_from', type=str, default=None,
                        help="""continue training from saved model at this path. Path must contain files saved by previous training process:
                             'config.pkl'        : configuration;
@@ -52,7 +54,7 @@ def main():
     train(args)
 
 def train(args):
-    data_loader = TextLoader(args.data_dir, args.batch_size, args.seq_length)
+    data_loader = TextLoader(args.data_dir, args.batch_size, args.seq_length, args.input_encoding)
     args.vocab_size = data_loader.vocab_size
 
     # check compatibility if training is continued from previously saved model
