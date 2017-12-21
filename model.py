@@ -83,7 +83,7 @@ class Model():
         optimizer = tf.train.AdamOptimizer(self.lr)
         self.train_op = optimizer.apply_gradients(zip(grads, tvars))
 
-    def sample(self, sess, words, vocab, num=200, prime='first all', sampling_type=1, pick=0, width=4):
+    def sample(self, sess, words, vocab, num=200, prime='first all', sampling_type=1, pick=0, width=4, quiet=False):
         def weighted_pick(weights):
             t = np.cumsum(weights)
             s = np.sum(weights)
@@ -118,9 +118,11 @@ class Model():
             state = sess.run(self.cell.zero_state(1, tf.float32))
             if not len(prime) or prime == ' ':
                 prime  = random.choice(list(vocab.keys()))
-            print (prime)
+            if not quiet:
+                print(prime)
             for word in prime.split()[:-1]:
-                print (word)
+                if not quiet:
+                    print(word)
                 x = np.zeros((1, 1))
                 x[0, 0] = vocab.get(word,0)
                 feed = {self.input_data: x, self.initial_state:state}
